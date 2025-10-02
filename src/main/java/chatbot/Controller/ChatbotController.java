@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 @RestController
-//@RequestMapping("/chatbot")
+@RequestMapping("/chatbot")
 public class ChatbotController {
     private final ChatbotService chatbotService;
 
@@ -20,7 +20,7 @@ public class ChatbotController {
         this.chatbotService = chatbotService;
     }
 
-    @PostMapping("/chatbot")
+    @PostMapping("/chat")
     public Mono<ChatbotResponseDto> handleChat(@RequestBody ChatbotRequestDto request) {
         // place가 있고 question이 없으면 첫 질문, question이 있으면 이어가는 질문
         if (request.getPlace() != null && !request.getPlace().isEmpty()) {
