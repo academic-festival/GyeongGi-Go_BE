@@ -1,8 +1,6 @@
 package academic_festival.gyeonggi_go.Home.Dto;
 
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -52,15 +50,21 @@ public class GgApiResponse {
 
     @Getter
     @Setter
-    @EqualsAndHashCode(onlyExplicitlyIncluded = true)
     @JsonIgnoreProperties(ignoreUnknown = true)
+    @EqualsAndHashCode(onlyExplicitlyIncluded = true)
     public static class Row {
         @EqualsAndHashCode.Include
         @JsonProperty("SIGUN_NM")
         private String sigunNm;
+
         @EqualsAndHashCode.Include
         @JsonProperty("TURSM_INFO_NM")
         private String turSmInfoNm;
+
+        //ADST API
+        @JsonProperty("NM_SM_NM")
+        private String nmSmNm;
+
         @JsonProperty("TELNO")
         private String telNo;
         @JsonProperty("DATA_STD_DE")
@@ -70,16 +74,16 @@ public class GgApiResponse {
         @JsonProperty("REFINE_WGS84_LOGT")
         private String refineWgs84Logt;
 
-        //ADST API
-        @JsonProperty("NM_SM_NM")
-        private String nmSmNm;
-
-        //LOCALCULTRELC API
-        @JsonProperty("SIGUN_CD")
-        private String sigunCd;
-
         // ETST, TTST API
         @JsonProperty("SM_RE_ADDR")
         private String smReAddr;
+
+        @JsonGetter("TURSM_INFO_NM")
+        public String getTurSmInfoNmForOutput() {
+            if (this.turSmInfoNm != null && !this.turSmInfoNm.trim().isEmpty()) {
+                return this.turSmInfoNm;
+            }
+            return this.nmSmNm;
+        }
     }
 }
