@@ -1,4 +1,4 @@
-package chatbot.Dto.Request;
+package academic_festival.gyeonggi_go.chatbot.Dto.Request;
 
 import java.util.List;
 

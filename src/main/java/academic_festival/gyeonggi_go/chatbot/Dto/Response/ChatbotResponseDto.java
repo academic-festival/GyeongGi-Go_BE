@@ -1,4 +1,4 @@
-package chatbot.Dto.Response;
+package academic_festival.gyeonggi_go.chatbot.Dto.Response;
 
 import java.util.List;
 
