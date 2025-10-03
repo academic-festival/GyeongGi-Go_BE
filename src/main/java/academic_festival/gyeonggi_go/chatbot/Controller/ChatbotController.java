@@ -19,7 +19,7 @@ public class ChatbotController {
         this.chatbotService = chatbotService;
     }
 
-    @PostMapping("/academic_festival/gyeonggi_go/chatbot")
+    @PostMapping("/chatbot")
     public Mono<ChatbotResponseDto> handleChat(@RequestBody ChatbotRequestDto request) {
         // place가 있고 question이 없으면 첫 질문, question이 있으면 이어가는 질문
         if (request.getPlace() != null && !request.getPlace().isEmpty()) {
