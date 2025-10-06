@@ -43,14 +43,14 @@ public class ChatbotService {
     //대화시작
     public Mono<ChatbotResponseDto> startConversation(String place) {
         String prompt = String.format(
-                "모든 건 영어로 답변해줘! '%s'라는 관광지에 다른 말 없이 바로 한두줄로 짧게 설명해줘 뒤에 질문을 하며 더 알아갈 수 있게! 그리고 관광지에 대한 흥미로운 질문 2개를 '질문1: 내용, 질문2: 내용' 형식으로 다음줄에 제안해줘. 예를들어 수원화성에 담긴 역사가 궁금해? 느낌으로 질문은 물음표 포함해서 영어 25글자 이내로 해줘!", place);
+                "모든 건 영어로 답변해줘! '%s'라는 관광지에 다른 말 없이 바로 한두줄로 짧게 설명해줘 뒤에 질문을 하며 더 알아갈 수 있게! 그리고 관광지에 대한 흥미로운 질문 2개를 '질문1: 내용, 질문2: 내용' 형식으로 다음줄에 제안해줘. 예를들어 수원화성에 담긴 역사가 궁금해? 느낌으로 질문은 물음표 포함해서 영어 45글자 이내로 해줘!", place);
         return callGeminiApi(prompt);
     }
 
     //대화 이어가기
     public Mono<ChatbotResponseDto> continueConversation(String question) {
         String prompt =String.format(
-                "모든 건 영어로 답변해줘! '%s'라는 질문에 대해 다른 말 없이 바로 설명해줘 그리고 관광지에 대한 흥미로운 질문 2개를 '질문1: 내용, 질문2: 내용' 형식으로 다음줄에 제안해줘. 예를들어 수원화성에 담긴 역사가 궁금해? 느낌으로 질문은 물음표 포함해서 영어 25글자 이내로 해줘!", question);
+                "모든 건 영어로 답변해줘! '%s'라는 질문에 대해 다른 말 없이 바로 설명해줘 그리고 관광지에 대한 흥미로운 질문 2개를 '질문1: 내용, 질문2: 내용' 형식으로 다음줄에 제안해줘. 예를들어 수원화성에 담긴 역사가 궁금해? 느낌으로 질문은 물음표 포함해서 영어 45글자 이내로 해줘!", question);
         return callGeminiApi(prompt);
     }
 
