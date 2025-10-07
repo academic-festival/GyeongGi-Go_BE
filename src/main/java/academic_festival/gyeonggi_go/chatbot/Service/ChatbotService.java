@@ -1,6 +1,6 @@
 package academic_festival.gyeonggi_go.chatbot.Service;
 
-import academic_festival.gyeonggi_go.chatbot.Dto.Response.ChatbotResponseDto;
+import academic_festival.gyeonggi_go.chatbot.Dto.Response.ChatbotDataDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -22,7 +22,7 @@ public class ChatbotService {
     }
 
     //Gemini API 호출하는 공통 메서드
-    private Mono<ChatbotResponseDto> callGeminiApi(String prompt) {
+    private Mono<ChatbotDataDto> callGeminiApi(String prompt) {
         Map<String, Object> requestBody = Map.of(
                 "contents", List.of(
                         Map.of(
@@ -41,7 +41,7 @@ public class ChatbotService {
     }
 
     //대화시작
-    public Mono<ChatbotResponseDto> startConversation(String place) {
+    public Mono<ChatbotDataDto> startConversation(String place) {
         String prompt = String.format(
                 "모든 건 영어로 답변해줘! " +
                         "⚠️ 절대 인삿말, 서두, 감탄사(예: 네!, 좋아요!, 알겠습니다!)를 하지 마. " +
@@ -52,7 +52,7 @@ public class ChatbotService {
     }
 
     //대화 이어가기
-    public Mono<ChatbotResponseDto> continueConversation(String question) {
+    public Mono<ChatbotDataDto> continueConversation(String question) {
         String prompt =String.format(
                 "모든 건 영어로 답변해줘! " +
                         "⚠️ 절대 인삿말, 서두, 감탄사(예: 네!, 좋아요!, 알겠습니다!)를 하지 마. " +
@@ -64,7 +64,7 @@ public class ChatbotService {
 
 
     //제미나이 응답을 파싱하여 ChatResponse 객체로 변환
-    private ChatbotResponseDto parseResponse(Map<String, Object> responseBody) {
+    private ChatbotDataDto parseResponse(Map<String, Object> responseBody) {
         try {
             // 복잡한 JSON 구조에서 텍스트 부분만 추출
             List<Map<String, Object>> candidates = (List<Map<String, Object>>) responseBody.get("candidates");
@@ -93,10 +93,10 @@ public class ChatbotService {
             // 답변 부분에 남아있을 수 있는 마크다운(**) 문자도 제거
             String answer = answerBuilder.toString().trim().replaceAll("\\*\\*", "");
 
-            return new ChatbotResponseDto(answer, questions);
+            return new ChatbotDataDto(answer, questions);
         } catch (Exception e) {
             // 파싱 오류 발생 시 기본 응답 반환
-            return new ChatbotResponseDto("Sorry, There was a problem generating your answer. ", null);
+            return new ChatbotDataDto("Sorry, There was a problem generating your answer. ", null);
         }
     }
 }

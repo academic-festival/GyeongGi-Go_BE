@@ -1,7 +1,8 @@
 package academic_festival.gyeonggi_go.chatbot.Controller;
 
 import academic_festival.gyeonggi_go.chatbot.Dto.Request.ChatbotRequestDto;
-import academic_festival.gyeonggi_go.chatbot.Dto.Response.ChatbotResponseDto;
+import academic_festival.gyeonggi_go.chatbot.Dto.Response.ApiResponseDto;
+import academic_festival.gyeonggi_go.chatbot.Dto.Response.ChatbotDataDto;
 import academic_festival.gyeonggi_go.chatbot.Service.ChatbotService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,15 +20,23 @@ public class ChatbotController {
     }
 
     @PostMapping("/chatbot")
-    public Mono<ChatbotResponseDto> handleChat(@RequestBody ChatbotRequestDto request) {
-        // place가 있고 question이 없으면 첫 질문, question이 있으면 이어가는 질문
+    public Mono<ApiResponseDto<ChatbotDataDto>> handleChat(@RequestBody ChatbotRequestDto request) {
+
+        // 요청에 따라 적절한 서비스 메소드를 호출하는 Mono를 선택
+        Mono<ChatbotDataDto> chatDataMono;
         if (request.getPlace() != null && !request.getPlace().isEmpty()) {
-            return chatbotService.startConversation(request.getPlace());
+            chatDataMono = chatbotService.startConversation(request.getPlace());
         } else if (request.getQuestion() != null && !request.getQuestion().isEmpty()) {
-            return chatbotService.continueConversation(request.getQuestion());
+            chatDataMono = chatbotService.continueConversation(request.getQuestion());
         } else {
             // 잘못된 요청에 대한 처리
-            return Mono.just(new ChatbotResponseDto("어떤 관광지가 궁금하신가요?", null));
+            ChatbotDataDto errorData = new ChatbotDataDto("Place or question is required.", null);
+            return Mono.just(new ApiResponseDto<>(400, "요청이 유효하지 않습니다.", errorData));
         }
+
+        // 서비스로부터 성공적인 결과를 받으면, ApiResponseDto로 감싸서 반환
+        return chatDataMono.map(chatData ->
+                new ApiResponseDto<>(200, "챗봇이 답변을 완료했습니다.", chatData)
+        );
     }
 }
