@@ -24,8 +24,8 @@ public class ChatbotController {
 
         // 요청에 따라 적절한 서비스 메소드를 호출하는 Mono를 선택
         Mono<ChatbotDataDto> chatDataMono;
-        if (request.getPlace() != null && !request.getPlace().isEmpty()) {
-            chatDataMono = chatbotService.startConversation(request.getPlace());
+        if (request.getPlacename() != null && !request.getPlacename().isEmpty()) {
+            chatDataMono = chatbotService.startConversation(request.getPlacename());
         } else if (request.getQuestion() != null && !request.getQuestion().isEmpty()) {
             chatDataMono = chatbotService.continueConversation(request.getQuestion());
         } else {

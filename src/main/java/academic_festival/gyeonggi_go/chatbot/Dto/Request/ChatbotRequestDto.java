@@ -12,18 +12,18 @@ public class ChatbotRequestDto {
     }
 
     // 모든 필드를 포함하는 생성자 (선택 사항)
-    public ChatbotRequestDto(String place, String question, List<String> conversationHistory) {
-        this.placename = place;
+    public ChatbotRequestDto(String placename, String question, List<String> conversationHistory) {
+        this.placename = placename;
         this.question = question;
         this.conversationHistory = conversationHistory;
     }
 
     // Getter와 Setter
-    public String getPlace() {
+    public String getPlacename() {
         return placename;
     }
 
-    public void setPlace(String place) { this.placename = placename; }
+    public void setPlacename(String placename) { this.placename = placename; }
 
     public String getQuestion() {
         return question;
