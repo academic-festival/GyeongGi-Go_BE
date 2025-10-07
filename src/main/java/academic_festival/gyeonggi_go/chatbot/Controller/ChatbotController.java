@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 @RestController
-//@RequestMapping("/chatbot")
 public class ChatbotController {
     private final ChatbotService chatbotService;
 
