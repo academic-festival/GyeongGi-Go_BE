@@ -24,7 +24,7 @@ public class GyeonggiApiKeyService {
         if (apiKeys.size() != apiUrls.size()) {
             throw new IllegalStateException("API 키 개수(" + apiKeys.size() + ")와 URL 개수(" + apiUrls.size() + ")가 일치하지 않습니다. 순서대로 1:1 매핑되어야 합니다.");
         }
-        System.out.println("✅ 총 " + apiKeys.size() + "개의 API 키와 " + apiUrls.size() + "개의 URL이 로드되었습니다.");
+        System.out.println("총 " + apiKeys.size() + "개의 API 키와 " + apiUrls.size() + "개의 URL이 로드되었습니다.");
     }
 
     public List<String> getAllApiKeys() {

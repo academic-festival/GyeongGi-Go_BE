@@ -15,7 +15,7 @@ public class ApiController {
         this.ggApiService = ggApiService;
     }
 
-    @GetMapping("/api/tour/load-all")
+    @GetMapping("/tour/load-all")
     public List<GgApiResponse.Row> loadAllHtstData() {
         return ggApiService.fetchAllTourDataByAllKeys();
     }
