@@ -1,43 +1,18 @@
 package academic_festival.gyeonggi_go.chatbot.Dto.Request;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.util.List;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class ChatbotRequestDto {
     private String placename;
     private String question;
     private List<String> conversationHistory; // 선택 사항: 대화 기록
-
-    // 기본 생성자 (JSON <-> Object 변환에 필요)
-    public ChatbotRequestDto() {
-    }
-
-    // 모든 필드를 포함하는 생성자 (선택 사항)
-    public ChatbotRequestDto(String placename, String question, List<String> conversationHistory) {
-        this.placename = placename;
-        this.question = question;
-        this.conversationHistory = conversationHistory;
-    }
-
-    // Getter와 Setter
-    public String getPlacename() {
-        return placename;
-    }
-
-    public void setPlacename(String placename) { this.placename = placename; }
-
-    public String getQuestion() {
-        return question;
-    }
-
-    public void setQuestion(String question) {
-        this.question = question;
-    }
-
-    public List<String> getConversationHistory() {
-        return conversationHistory;
-    }
-
-    public void setConversationHistory(List<String> conversationHistory) {
-        this.conversationHistory = conversationHistory;
-    }
 }
