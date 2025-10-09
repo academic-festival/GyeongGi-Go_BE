@@ -22,7 +22,21 @@ public class PlaceBatchSyncService {
         this.placeRepository = placeRepository;
     }
 
-    @Scheduled(initialDelay = 0, cron = "0 0 3 * * *") // 매일 새벽 3시에 실행
+    @Scheduled(cron = "0 0 3 * * *") // cron만 사용
+    @Transactional
+    public void scheduleDailySync() {
+        System.out.println("--- [cron 실행] 매일 새벽 3시 정기 동기화 시작 ---");
+        this.syncGyeonggiTourData();
+    }
+
+    @Scheduled(initialDelay = 0, fixedDelay = Long.MAX_VALUE) // initialDelay만 사용하고, 이후 반복은 하지 않도록 설정
+    @Transactional
+    public void scheduleInitialSync() {
+        System.out.println("--- [initialDelay 실행] 애플리케이션 시작 후 최초 동기화 시작 ---");
+        this.syncGyeonggiTourData();
+    }
+
+
     @Transactional
     public void syncGyeonggiTourData() {
         System.out.println("=================================================");
