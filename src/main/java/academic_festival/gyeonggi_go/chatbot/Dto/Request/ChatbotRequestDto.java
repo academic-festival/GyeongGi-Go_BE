@@ -1,5 +1,6 @@
 package academic_festival.gyeonggi_go.chatbot.Dto.Request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,7 +13,12 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChatbotRequestDto {
+    @Schema(description = "장소이름", example = "Suwon Hwaseong")
     private String placename;
+
+    @Schema(description = "유저가 선택한 질문", example = "What is the history behind Suwon Hwaseong?")
     private String question;
+
+    //@Schema(description = "", example = "")
     private List<String> conversationHistory; // 선택 사항: 대화 기록
 }
