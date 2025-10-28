@@ -42,13 +42,17 @@ public class ChatbotService {
 
     //대화시작
     public Mono<ChatbotDataDto> startConversation(String place) {
-        String prompt = String.format(
+        String greeting = String.format("Hello! What are you curious about %s?\n\n", place);
+        String prompt =String.format(
                 "모든 건 영어로 답변해줘! " +
                         "⚠️ 절대 인삿말, 서두, 감탄사(예: 네!, 좋아요!, 알겠습니다!)를 하지 마. " +
-                        "'%s'라는 관광지에 대해 짧게 설명해줘 뒤에 질문을 하며 더 알아갈 수 있게! " +
-                        "그리고 관광지에 대한 흥미로운 질문 3개를 '질문1: 내용, 질문2: 내용' 형식으로 다음줄에 제안해줘. " +
+                        "'%s'라는 관광지에 대해 흥미로운 질문 3개를 '질문1: 내용, 질문2: 내용' 형식으로 다음줄에 제안해줘. " +
                         "예를들어 수원화성에 담긴 역사가 궁금해? 느낌으로 질문은 물음표 포함해서 영어 45글자 이내로 해줘!", place);
-        return callGeminiApi(prompt);
+        return callGeminiApi(prompt)
+                .map(responseData -> {
+                    String combinedAnswer = greeting + responseData.getAnswer();
+                    return new ChatbotDataDto(combinedAnswer, responseData.getSuggestedQuestions());
+                });
     }
 
     //대화 이어가기
