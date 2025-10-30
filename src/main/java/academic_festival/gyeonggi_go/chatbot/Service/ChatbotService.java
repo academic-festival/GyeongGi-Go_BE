@@ -41,13 +41,18 @@ public class ChatbotService {
     }
 
     //대화시작
-    public Mono<ChatbotDataDto> startConversation(String place) {
-        String greeting = String.format("Hello! What are you curious about %s?\n\n", place);
+    public Mono<ChatbotDataDto> startConversation(String place, String locationExplain) {
+        String greeting = String.format("Hello! What are you curious about %s?", place);
         String prompt =String.format(
                 "모든 건 영어로 답변해줘! " +
                         "⚠️ 절대 인삿말, 서두, 감탄사(예: 네!, 좋아요!, 알겠습니다!)를 하지 마. " +
-                        "'%s'라는 관광지에 대해 흥미로운 질문 3개를 'Question1: 내용, Question2: 내용' 형식으로 다음줄에 제안해줘. " +
-                        "예를들어 수원화성에 담긴 역사가 궁금해? 느낌으로 질문은 물음표 포함해서 영어 45글자 이내로 해줘!", place);
+                        "\n---제공된 컨텍스트---" +
+                        "\n%s" + // DB의 locationExplain
+                        "\n---컨텍스트 끝---" +
+                        "\n\n위에 제공된 **컨텍스트만을 바탕으로** '%s'라는 관광지에 대해 흥미로운 질문 3개를 'Question1: 내용, Question2: 내용, Question3: 내용' 형식으로 다음줄에 제안해줘. " +
+                        "⚠️ 컨텍스트에 없는 정보는 사용하지 마." +
+                        "질문은 물음표 포함해서 영어 45글자 이내로 해줘!",
+                locationExplain, place);
         return callGeminiApi(prompt)
                 .map(responseData -> {
                     String combinedAnswer = greeting + responseData.getAnswer();
@@ -56,13 +61,18 @@ public class ChatbotService {
     }
 
     //대화 이어가기
-    public Mono<ChatbotDataDto> continueConversation(String question) {
+    public Mono<ChatbotDataDto> continueConversation(String question, String locationExplain) {
         String prompt =String.format(
                 "모든 건 영어로 답변해줘! " +
                         "⚠️ 절대 인삿말, 서두, 감탄사(예: 네!, 좋아요!, 알겠습니다!)를 하지 마. " +
-                        "'%s'라는 질문에 대해 다른 말 없이 바로 설명해줘 "+
-                        "그리고 관광지에 대한 흥미로운 질문 3개를 'Question1: 내용, Question2: 내용' 형식으로 다음줄에 제안해줘. " +
-                        "예를들어 수원화성에 담긴 역사가 궁금해? 느낌으로 질문은 물음표 포함해서 영어 45글자 이내로 해줘!", question);
+                        "\n---제공된 컨텍스트---" +
+                        "\n%s" + // DB의 locationExplain
+                        "\n---컨텍스트 끝---" +
+                        "\n\n위에 제공된 **컨텍스트만을 바탕으로** '%s'라는 질문에 대해 다른 말 없이 바로 설명해줘. " +
+                        "⚠️ 컨텍스트에 없는 정보는 절대 대답하지 마." +
+                        "그리고 나서 컨텍스트를 바탕으로 흥미로운 질문 3개를 'Question1: 내용, Question2: 내용, Question3: 내용' 형식으로 다음줄에 제안해줘. " +
+                        "질문은 물음표 포함해서 영어 45글자 이내로 해줘!",
+                locationExplain, question);
         return callGeminiApi(prompt);
     }
 
