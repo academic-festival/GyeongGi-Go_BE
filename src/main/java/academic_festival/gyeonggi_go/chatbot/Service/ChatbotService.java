@@ -49,7 +49,7 @@ public class ChatbotService {
                         "\n---제공된 컨텍스트---" +
                         "\n%s" + // DB의 locationExplain
                         "\n---컨텍스트 끝---" +
-                        "\n\n위에 제공된 **컨텍스트만을 바탕으로** '%s'라는 관광지에 대해 흥미로운 질문 3개를 'Question1: 내용, Question2: 내용, Question3: 내용' 형식으로 다음줄에 제안해줘. " +
+                        "\n\n위에 제공된 **컨텍스트만을 바탕으로** '%s'라는 관광지에 대해 흥미로운 서로다른 질문 30개를 'Question1: 내용, Question2: 내용, Question3: 내용' 형식으로 다음줄에 제안해줘. " +
                         "⚠️ 컨텍스트에 없는 정보는 사용하지 마." +
                         "질문은 물음표 포함해서 영어 45글자 이내로 해줘!",
                 locationExplain, place);
@@ -69,9 +69,7 @@ public class ChatbotService {
                         "\n%s" + // DB의 locationExplain
                         "\n---컨텍스트 끝---" +
                         "\n\n위에 제공된 **컨텍스트만을 바탕으로** '%s'라는 질문에 대해 다른 말 없이 바로 설명해줘. " +
-                        "⚠️ 컨텍스트에 없는 정보는 절대 대답하지 마." +
-                        "그리고 나서 컨텍스트를 바탕으로 흥미로운 질문 3개를 'Question1: 내용, Question2: 내용, Question3: 내용' 형식으로 다음줄에 제안해줘. " +
-                        "질문은 물음표 포함해서 영어 45글자 이내로 해줘!",
+                        "⚠️ 컨텍스트에 없는 정보는 절대 대답하지 마.",
                 locationExplain, question);
         return callGeminiApi(prompt);
     }
@@ -80,10 +78,20 @@ public class ChatbotService {
     //제미나이 응답을 파싱하여 ChatResponse 객체로 변환
     private ChatbotDataDto parseResponse(Map<String, Object> responseBody) {
         try {
-            // 복잡한 JSON 구조에서 텍스트 부분만 추출
+            // JSON 구조에서 텍스트 부분만 추출
             List<Map<String, Object>> candidates = (List<Map<String, Object>>) responseBody.get("candidates");
+            // 【추가】: API 응답이 비정상일 경우 방어 코드
+            if (candidates == null || candidates.isEmpty()) {
+                return new ChatbotDataDto("Sorry, I couldn't get a response.", null);
+            }
             Map<String, Object> content = (Map<String, Object>) candidates.get(0).get("content");
+            if (content == null) {
+                return new ChatbotDataDto("Sorry, the response content is empty.", null);
+            }
             List<Map<String, Object>> parts = (List<Map<String, Object>>) content.get("parts");
+            if (parts == null || parts.isEmpty()) {
+                return new ChatbotDataDto("Sorry, the response part is missing.", null);
+            }
             String rawText = (String) parts.get(0).get("text");
 
             // Gemini가 생성한 텍스트에서 답변과 질문 분리
@@ -91,15 +99,21 @@ public class ChatbotService {
             StringBuilder answerBuilder = new StringBuilder();
             List<String> questions = new java.util.ArrayList<>();
 
+            // "Question" + 숫자
+            java.util.regex.Pattern questionPattern = java.util.regex.Pattern.compile("^Question\\d+:");
+
             for (String line : lines) {
                 //1. 앞뒤 공백제거
                 String trimmedLine = line.trim();
 
-                //2. 질문1 질문2 질문3 분리
-                if (trimmedLine.contains("Question 1:") || trimmedLine.contains("Question1:") || trimmedLine.contains("Question 2:") || trimmedLine.contains("Question2:")|| trimmedLine.contains("Question 3:") || trimmedLine.contains("Question3:")) {
+                //2. 정규식을 사용하여 라인이 질문 패턴으로 시작하는지 확인
+                java.util.regex.Matcher matcher = questionPattern.matcher(trimmedLine);
+
+                if (matcher.find()) {
                     // 3. ':' 뒤의 내용만 잘라내서 질문 목록에 추가
                     questions.add(trimmedLine.substring(trimmedLine.indexOf(":") + 1).trim());
                 } else {
+                    // 질문이 아닌 라인은 답변(answer)에 추가
                     answerBuilder.append(line).append("\n");
                 }
             }
@@ -109,7 +123,7 @@ public class ChatbotService {
 
             return new ChatbotDataDto(answer, questions);
         } catch (Exception e) {
-            // 파싱 오류 발생 시 기본 응답 반환
+            // 파싱 오류 발생 시 기본 응답 반환 (e.printStackTrace() 등으로 로그를 남기는 것이 좋습니다)
             return new ChatbotDataDto("Sorry, There was a problem generating your answer. ", null);
         }
     }
