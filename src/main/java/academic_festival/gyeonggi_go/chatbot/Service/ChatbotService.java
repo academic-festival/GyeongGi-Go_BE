@@ -40,8 +40,8 @@ public class ChatbotService {
                 .map(this::parseResponse); // 받은 응답을 파싱하여 ChatResponse 객체로 변환
     }
 
+    //영어이름으로 변경하는 메서드
     private Mono<String> getEnglishPlaceName(String koreanPlace) {
-        // 1. [새 프롬프트] 오직 번역(영어 이름)만 요청하는 프롬프트입니다.
         String translationPrompt = String.format(
                 "다음 한국어 장소 이름을 공식 영어 명칭으로 번역해줘. " +
                         "⚠️ **절대** 인사말, 설명, 따옴표 없이 오직 '영어 이름' 텍스트만 응답해야 해. " +
