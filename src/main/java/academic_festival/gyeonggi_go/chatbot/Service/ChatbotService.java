@@ -58,8 +58,7 @@ public class ChatbotService {
     //대화시작
     public Mono<ChatbotDataDto> startConversation(String place, String locationExplain) {
 
-        // 1. 헬퍼 메서드를 호출하여 '영어 이름'을 먼저 받아옵니다.
-        return getEnglishPlaceName(place)
+        return getEnglishPlaceName(place) //헬퍼메서드를 호출해 영어이름 먼저 받아오기
                 .flatMap(englishPlace -> {
                     String questionPrompt = String.format(
                             "모든 건 영어로 답변해줘! " +
@@ -72,7 +71,6 @@ public class ChatbotService {
                                     "질문은 물음표 포함해서 영어 45글자 이내로 해줘!",
                             locationExplain, englishPlace); // 'place' 대신 'englishPlace' 사용
 
-                    // 4. '질문 생성' API를 호출합니다.
                     return callGeminiApi(questionPrompt)
                             .map(responseData -> {
                                 String greeting = String.format("Hello! What are you curious about %s?", englishPlace);
