@@ -40,25 +40,46 @@ public class ChatbotService {
                 .map(this::parseResponse); // 받은 응답을 파싱하여 ChatResponse 객체로 변환
     }
 
+    //영어이름으로 변경하는 메서드
+    private Mono<String> getEnglishPlaceName(String koreanPlace) {
+        String translationPrompt = String.format(
+                "다음 한국어 장소 이름을 공식 영어 명칭으로 번역해줘. " +
+                        "⚠️ **절대** 인사말, 설명, 따옴표 없이 오직 '영어 이름' 텍스트만 응답해야 해. " +
+                        "예시: '수원화성' -> 'Suwon Hwaseong Fortress'" +
+                        "\n\n장소: '%s'",
+                koreanPlace
+        );
+
+        return callGeminiApi(translationPrompt)
+                .map(ChatbotDataDto::getAnswer)
+                .map(String::trim);
+    }
+
     //대화시작
     public Mono<ChatbotDataDto> startConversation(String place, String locationExplain) {
-        String greeting = String.format("Hello! What are you curious about %s?", place);
-        String prompt =String.format(
-                "모든 건 영어로 답변해줘! " +
-                        "⚠️ 절대 인삿말, 서두, 감탄사(예: 네!, 좋아요!, 알겠습니다!)를 하지 마. " +
-                        "\n---제공된 컨텍스트---" +
-                        "\n%s" + // DB의 locationExplain
-                        "\n---컨텍스트 끝---" +
-                        "\n\n위에 제공된 **컨텍스트만을 바탕으로** '%s'라는 관광지에 대해 흥미로운 서로다른 질문 30개를 'Question1: 내용, Question2: 내용, Question3: 내용' 형식으로 다음줄에 제안해줘. " +
-                        "⚠️ 컨텍스트에 없는 정보는 사용하지 마." +
-                        "질문은 물음표 포함해서 영어 45글자 이내로 해줘!",
-                locationExplain, place);
-        return callGeminiApi(prompt)
-                .map(responseData -> {
-                    String combinedAnswer = greeting + responseData.getAnswer();
-                    return new ChatbotDataDto(combinedAnswer, responseData.getSuggestedQuestions());
+
+        return getEnglishPlaceName(place) //헬퍼메서드를 호출해 영어이름 먼저 받아오기
+                .flatMap(englishPlace -> {
+                    String questionPrompt = String.format(
+                            "모든 건 영어로 답변해줘! " +
+                                    "⚠️ 절대 인삿말, 서두, 감탄사(예: 네!, 좋아요!, 알겠습니다!)를 하지 마. " +
+                                    "\n---제공된 컨텍스트---" +
+                                    "\n%s" + // DB의 locationExplain
+                                    "\n---컨텍스트 끝---" +
+                                    "\n\n위에 제공된 **컨텍스트만을 바탕으로** '%s'라는 관광지에 대해 흥미로운 서로다른 질문 30개를 'Question1: 내용, Question2: 내용, Question3: 내용' 형식으로 다음줄에 제안해줘." +
+                                    "⚠️ 컨텍스트에 없는 정보는 사용하지 마." +
+                                    "질문은 물음표 포함해서 영어 45글자 이내로 해줘!",
+                            locationExplain, englishPlace); // 'place' 대신 'englishPlace' 사용
+
+                    return callGeminiApi(questionPrompt)
+                            .map(responseData -> {
+                                String greeting = String.format("Hello! What are you curious about %s?", englishPlace);
+                                String combinedAnswer = greeting + responseData.getAnswer();
+                                return new ChatbotDataDto(combinedAnswer, responseData.getSuggestedQuestions());
+                            });
                 });
     }
+
 
     //대화 이어가기
     public Mono<ChatbotDataDto> continueConversation(String question, String locationExplain) {
