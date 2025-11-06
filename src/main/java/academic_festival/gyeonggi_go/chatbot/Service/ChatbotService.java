@@ -7,8 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-
-import java.util.Base64; // [추가]
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
@@ -22,13 +21,13 @@ public class ChatbotService {
     public ChatbotService(WebClient.Builder webClientBuilder,
                           @Value("${gemini.api.url}") String apiUrl,
                           @Value("${gemini.api.key}") String apiKey,
-                          TtsService ttsService) { // [추가] 생성자 주입
+                          TtsService ttsService) {
         this.webClient = webClientBuilder.baseUrl(apiUrl).build();
         this.apiKey = apiKey;
         this.ttsService = ttsService;
     }
 
-    //Gemini API 호출하는 공통 메서드
+    //Gemini API 호출 메서드
     private Mono<ChatbotDataDto> callGeminiApi(String prompt) {
         Map<String, Object> requestBody = Map.of(
                 "contents", List.of(
@@ -158,7 +157,7 @@ public class ChatbotService {
                         "⚠️ 컨텍스트에 없는 정보는 절대 대답하지 마.",
                 locationExplain, question);
 
-        // [수정] Gemini 응답을 받은 후, TTS 로직을 연결
+        // Gemini 응답을 받은 후, TTS 로직을 연결
         return callGeminiApi(prompt)
                 .flatMap(geminiDto -> createDtoWithTts(geminiDto, enableTts));
     }

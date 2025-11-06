@@ -70,18 +70,20 @@ public class ChatbotController {
         }
 
         return Mono.fromCallable(() -> {
-                    // 1. DB에서 장소 정보 조회 (실제 Repository 메서드명으로 변경)
+                    // 1. DB에서 장소 정보 조회
                     return placeRepository.findByPlaceNameAndAddress(request.getPlacename(), request.getAddress())
                             .orElseThrow(() -> new NoSuchElementException("Place not found: " + request.getPlacename() + " at " + request.getAddress()));
                 })
-                .subscribeOn(Schedulers.boundedElastic()) // Blocking I/O를 별도 스레드 풀에서 실행
+                .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(place -> {
+
                     // 2. DB에서 조회한 locationExplain 값을 서비스로 전달
                     return chatbotService.startConversation(place.getPlaceName(), place.getLocationExplain(), enableTts);
                 })
                 .map(chatData ->
                         new ApiResponseDto<>(200, "챗봇이 답변을 완료했습니다.", chatData)
                 )
+
                 // 3. 장소를 찾지 못했을 때 404 에러 반환
                 .onErrorResume(NoSuchElementException.class, e -> {
                     ChatbotDataDto errorData = new ChatbotDataDto(e.getMessage(), null, null);
@@ -131,8 +133,9 @@ public class ChatbotController {
                     return placeRepository.findByPlaceNameAndAddress(request.getPlacename(), request.getAddress())
                             .orElseThrow(() -> new NoSuchElementException("Place not found: " + request.getPlacename() + " at " + request.getAddress()));
                 })
-                .subscribeOn(Schedulers.boundedElastic()) // Blocking I/O를 별도 스레드 풀에서 실행
+                .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(place -> {
+
                     // 2. DB에서 조회한 locationExplain 값과 질문을 서비스로 전달
                     return chatbotService.continueConversation(request.getQuestion(), place.getLocationExplain(), enableTts);
                 })
