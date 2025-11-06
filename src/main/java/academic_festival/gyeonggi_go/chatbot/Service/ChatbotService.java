@@ -114,18 +114,34 @@ public class ChatbotService {
                                     "질문은 물음표 포함해서 영어 45글자 이내로 해줘!",
                             locationExplain, englishPlace);
 
-                    // Gemini 응답을 받은 후, TTS 로직을 연결
-                    return callGeminiApi(questionPrompt)
-                            .flatMap(geminiDto -> {
-                                // 1. 응답 텍스트 조합
-                                String greeting = String.format("Hello! What are you curious about %s?", englishPlace);
+                    // 1. Gemini API 호출 (추천 질문 목록 가져오기)
+                    Mono<ChatbotDataDto> geminiMono = callGeminiApi(questionPrompt);
+
+                    // 2. TTS로 변환할 인사말 생성
+                    String greeting = String.format("Hello! What are you curious about %s?", englishPlace);
+
+                    // 3. TTS Mono 생성 (enableTts == true 일 때만 인사말을 변환)
+                    Mono<String> ttsMono;
+                    if (enableTts) {
+                        ttsMono = ttsService.synthesizeText(greeting) //인사말만 TTS로 변환!
+                                .map(this::encodeBase64) //byte를 Base64 로변경
+                                .onErrorResume(e -> {
+                                    logger.warn("TTS synthesis failed for greeting: {}", e.getMessage());
+                                    return Mono.just(""); //TTS 실패시 오디오는 비워서 보냄
+                                })
+                                .defaultIfEmpty("");
+                    } else {
+                        ttsMono = Mono.just("");
+                    }
+
+                    // 4. 제미나이 결과와 TTS 결과를 합쳐서 최종 DTO 생성
+                    return Mono.zip(geminiMono, ttsMono)
+                            .map(tuple -> {
+                                ChatbotDataDto geminiDto = tuple.getT1(); //제미나이응답
+                                String audioBase64 = tuple.getT2().isEmpty() ? null : tuple.getT2(); //TTS결과
                                 String combinedAnswer = greeting + geminiDto.getAnswer();
 
-                                // 2. 조합된 DTO 생성 (아직 오디오는 없음)
-                                ChatbotDataDto dtoWithGreeting = new ChatbotDataDto(combinedAnswer, geminiDto.getSuggestedQuestions(), null);
-
-                                // 3. TTS 처리 (내부에서 enableTts 분기 처리)
-                                return createDtoWithTts(dtoWithGreeting, enableTts);
+                                return new ChatbotDataDto(combinedAnswer, geminiDto.getSuggestedQuestions(), audioBase64);
                             });
                 });
     }
