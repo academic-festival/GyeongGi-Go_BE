@@ -13,4 +13,8 @@ public class ChatbotDataDto {
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY) //값이 null이면 필드를 아예 제외
     private final List<String> suggestedQuestions;
+
+    // Base64 인코딩된 오디오 데이터 (MP3)
+    @JsonInclude(JsonInclude.Include.NON_NULL) //값이 null이면 필드를 아예 제외
+    private final String audioData;
 }
