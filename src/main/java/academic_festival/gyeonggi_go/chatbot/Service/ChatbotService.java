@@ -146,7 +146,7 @@ public class ChatbotService {
 
 
     //대화 이어가기
-    public Mono<ChatbotDataDto> continueConversation(String question, String locationExplain, boolean enableTts) { // [수정] enableTts 파라미터 추가
+    public Mono<ChatbotDataDto> continueConversation(String question, String locationExplain, boolean enableTts) {
         String prompt =String.format(
                 "모든 건 영어로 답변해줘! " +
                         "⚠️ 절대 인삿말, 서두, 감탄사(예: 네!, 좋아요!, 알겠습니다!)를 하지 마. " +
