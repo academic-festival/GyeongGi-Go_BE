@@ -1,16 +1,12 @@
-package academic_festival.gyeonggi_go.tts.Service;
+package academic_festival.gyeonggi_go.chatbot.Service;
 
 import com.google.cloud.texttospeech.v1.*;
 import com.google.protobuf.ByteString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
-
-import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
 
 @Service
 public class TtsService {

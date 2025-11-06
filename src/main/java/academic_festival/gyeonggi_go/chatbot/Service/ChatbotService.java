@@ -1,7 +1,6 @@
 package academic_festival.gyeonggi_go.chatbot.Service;
 
 import academic_festival.gyeonggi_go.chatbot.Dto.Response.ChatbotDataDto;
-import academic_festival.gyeonggi_go.tts.Service.TtsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
