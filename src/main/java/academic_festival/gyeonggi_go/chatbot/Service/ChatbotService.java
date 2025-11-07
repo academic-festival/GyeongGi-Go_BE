@@ -3,6 +3,7 @@ package academic_festival.gyeonggi_go.chatbot.Service;
 import academic_festival.gyeonggi_go.chatbot.Dto.Response.ChatbotDataDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -15,16 +16,18 @@ import java.util.Map;
 public class ChatbotService {
     private final WebClient webClient;
     private final String apiKey;
-    private final TtsService ttsService;
+    //rivate final TtsService ttsService;
+    private final ObjectProvider<TtsService> ttsServiceProvider;
     private static final Logger logger = LoggerFactory.getLogger(ChatbotService.class);
 
     public ChatbotService(WebClient.Builder webClientBuilder,
                           @Value("${gemini.api.url}") String apiUrl,
                           @Value("${gemini.api.key}") String apiKey,
-                          TtsService ttsService) {
+                          ObjectProvider<TtsService> ttsServiceProvider) {
         this.webClient = webClientBuilder.baseUrl(apiUrl).build();
         this.apiKey = apiKey;
-        this.ttsService = ttsService;
+        //this.ttsService = ttsService;
+        this.ttsServiceProvider = ttsServiceProvider;
     }
 
     //Gemini API 호출 메서드
@@ -69,12 +72,13 @@ public class ChatbotService {
         }
 
         // TTS 변환 Mono
-        Mono<byte[]> ttsMono = ttsService.synthesizeText(geminiDto.getAnswer())
+        Mono<byte[]> ttsMono = synthesizeIfAvailable(geminiDto.getAnswer())
                 .onErrorResume(e -> {
                     // TTS 실패 시 에러 로그만 남기고 빈 Mono 반환 (오디오 없이 응답)
                     logger.warn("TTS synthesis failed: {}", e.getMessage());
                     return Mono.empty(); // 오디오 데이터는 null이 됨
                 });
+
 
         // 기존 Gemini DTO와 TTS 결과를 병합
         return Mono.zip(Mono.just(geminiDto), ttsMono.map(this::encodeBase64).defaultIfEmpty(""))
@@ -86,6 +90,17 @@ public class ChatbotService {
                     return new ChatbotDataDto(dto.getAnswer(), dto.getSuggestedQuestions(), audioBase64);
                 });
     }
+
+    // [수정] TtsService가 사용 가능할 때만 호출하는 헬퍼 메서드 추가
+    private Mono<byte[]> synthesizeIfAvailable(String text) {
+        TtsService service = ttsServiceProvider.getIfAvailable();
+        if (service == null) {
+            logger.warn("TTS 서비스가 구성되지 않아 오디오를 생성하지 않습니다.");
+            return Mono.empty();
+        }
+        return service.synthesizeText(text);
+    }
+
 
     // Base64 인코더 헬퍼 메서드
     private String encodeBase64(byte[] audioBytes) {
@@ -121,7 +136,7 @@ public class ChatbotService {
                     // 3. TTS Mono 생성 (enableTts == true 일 때만 인사말을 변환)
                     Mono<String> ttsMono;
                     if (enableTts) {
-                        ttsMono = ttsService.synthesizeText(greeting) //인사말만 TTS로 변환!
+                        ttsMono = synthesizeIfAvailable(greeting) //인사말만 TTS로 변환!
                                 .map(this::encodeBase64) //byte를 Base64 로변경
                                 .onErrorResume(e -> {
                                     logger.warn("TTS synthesis failed for greeting: {}", e.getMessage());
@@ -131,6 +146,7 @@ public class ChatbotService {
                     } else {
                         ttsMono = Mono.just("");
                     }
+
 
                     // 4. 제미나이 결과와 TTS 결과를 합쳐서 최종 DTO 생성
                     return Mono.zip(geminiMono, ttsMono)
