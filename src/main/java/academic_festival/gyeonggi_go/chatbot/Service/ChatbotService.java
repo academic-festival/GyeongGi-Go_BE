@@ -91,7 +91,7 @@ public class ChatbotService {
                 });
     }
 
-    // [수정] TtsService가 사용 가능할 때만 호출하는 헬퍼 메서드 추가
+    // TtsService가 사용 가능할 때만 호출하는 헬퍼 메서드 추가
     private Mono<byte[]> synthesizeIfAvailable(String text) {
         TtsService service = ttsServiceProvider.getIfAvailable();
         if (service == null) {
