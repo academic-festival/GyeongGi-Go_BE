@@ -24,6 +24,7 @@ public class GgApiResponse {
     }
     @Getter
     @Setter
+    @JsonFormat(with = JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
     public static class GgApiData {
         private List<Head> head;
         private List<Row> row;
