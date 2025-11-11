@@ -9,6 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class PlaceDetailDto {
+    private Long placeId;
     private String placeName;
     private String placeImg;
     private String locationExplain;
@@ -16,6 +17,7 @@ public class PlaceDetailDto {
     private String inquiry;
 
     public PlaceDetailDto(Place place) {
+        this.placeId = place.getPlaceId();
         this.placeName = place.getPlaceName();
         this.placeImg = place.getPlaceImg();
         this.locationExplain = place.getLocationExplain();
