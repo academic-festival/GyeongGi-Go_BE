@@ -37,7 +37,7 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     implementation 'com.google.cloud:google-cloud-vertexai:1.27.0'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.0' //swagger
+    implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.0' //swagger
     implementation 'com.google.cloud:google-cloud-texttospeech:2.40.0' //tts
 }
 
