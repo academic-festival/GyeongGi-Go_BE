@@ -9,9 +9,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableAsync
 @SpringBootApplication
 public class GyeonggiGoApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(GyeonggiGoApplication.class, args);
     }
-
 }
