@@ -28,7 +28,7 @@ public class HomeController {
     }
 
     @PostMapping("/home")
-    // 수정: 반환 타입을 Mono<Map<String, Object>>에서 Mono<String>으로 변경
+    // 반환 타입을 Mono<Map<String, Object>>에서 Mono<String>으로 변경
     public Mono<String> getNearestTourData(@RequestBody UserLocationRequest locationRequest) {
 
         double lat = locationRequest.getX();
@@ -41,7 +41,7 @@ public class HomeController {
         responseMap.put("message", "명소 목록 조회 성공");
         responseMap.put("data", nearestData);
 
-        // 수정: Map 객체를 JSON 문자열로 변환하고 TranslationService 호출
+        // Map 객체를 JSON 문자열로 변환하고 TranslationService 호출
         String jsonString;
         try {
             jsonString = objectMapper.writeValueAsString(responseMap);

@@ -6,8 +6,6 @@ import academic_festival.gyeonggi_go.Place.Dto.PlaceDetailDto;
 import academic_festival.gyeonggi_go.Place.Service.PlaceService;
 import com.fasterxml.jackson.databind.ObjectMapper; // ObjectMapper 재사용
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
