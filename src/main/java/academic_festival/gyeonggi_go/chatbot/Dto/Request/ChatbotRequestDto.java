@@ -13,18 +13,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChatbotRequestDto {
-//    @Schema(description = "장소이름", example = "Suwon Hwaseong")
-//    private String placename;
-//
-//    @Schema(description = "주소", example = "수원시")
-//    private String address;
-
-    @Schema(description = "장소 고유 ID", example = "10")
-    private Long placeId; // placename과 address 대신 placeId 사용
+    @Schema(description = "장소 고유 ID", example = "153")
+    private Long placeId;
 
     @Schema(description = "유저가 선택한 질문", example = "What is the history behind Suwon Hwaseong?")
     private String question;
 
-    //@Schema(description = "", example = "")
-    private List<String> conversationHistory; // 선택 사항: 대화 기록
 }

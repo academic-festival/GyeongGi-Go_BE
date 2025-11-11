@@ -16,7 +16,6 @@ import java.util.Map;
 public class ChatbotService {
     private final WebClient webClient;
     private final String apiKey;
-    //rivate final TtsService ttsService;
     private final ObjectProvider<TtsService> ttsServiceProvider;
     private static final Logger logger = LoggerFactory.getLogger(ChatbotService.class);
 
@@ -26,7 +25,6 @@ public class ChatbotService {
                           ObjectProvider<TtsService> ttsServiceProvider) {
         this.webClient = webClientBuilder.baseUrl(apiUrl).build();
         this.apiKey = apiKey;
-        //this.ttsService = ttsService;
         this.ttsServiceProvider = ttsServiceProvider;
     }
 
