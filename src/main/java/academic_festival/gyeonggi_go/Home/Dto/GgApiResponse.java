@@ -16,15 +16,18 @@ import java.util.List;
 public class GgApiResponse {
     private List<GgApiData> combinedData = new ArrayList<>();
 
+    @JsonProperty("RESULT")
+    private Result resultOnly;
+
     @JsonAnySetter
     public void handleUnknown(String key, List<GgApiData> value) {
         if (value != null) {
             combinedData.addAll(value);
         }
     }
+
     @Getter
     @Setter
-    //@JsonFormat(with = JsonFormat.Feature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
     public static class GgApiData {
         private List<Head> head;
         private List<Row> row;

@@ -4,6 +4,7 @@ import academic_festival.gyeonggi_go.Home.Dto.GgApiResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -53,12 +54,25 @@ public class GgApiService {
 
             GgApiResponse response = objectMapper.readValue(firstPageJson, GgApiResponse.class);
 
+            String serviceName = serviceUrl.substring(serviceUrl.lastIndexOf('/') + 1);
+
+            if (response.getCombinedData().isEmpty() || response.getCombinedData().get(0).getHead().isEmpty() || response.getCombinedData().get(0).getHead().get(0).getResult() == null) {
+                System.err.println("[" + serviceName + "] 응답에 유효한 Head/Result 구조가 없습니다. (데이터 없음 또는 오류 발생)");
+                return allRows;
+            }
+
+            String resultCode = response.getCombinedData().get(0).getHead().get(0).getResult().getCode();
+            if (!"INFO-000".equals(resultCode)) {
+                String message = response.getCombinedData().get(0).getHead().get(0).getResult().getMessage();
+                System.err.println("[" + serviceName + "] API 호출 실패! CODE: " + resultCode + ", MESSAGE: " + message);
+                return allRows;
+            }
+
             if (response.getCombinedData() != null && !response.getCombinedData().isEmpty()) {
 
                 totalCount = response.getCombinedData().get(0).getHead().get(0).getListTotalCount();
                 totalPages = (int) Math.ceil((double) totalCount / pageSize);
 
-                String serviceName = serviceUrl.substring(serviceUrl.lastIndexOf('/') + 1);
                 System.out.println("[" + serviceName + "] 전체 관광지 수: " + totalCount + ", 총 페이지 수: " + totalPages);
 
                 if (response.getCombinedData().size() > 1 && response.getCombinedData().get(1).getRow() != null) {
@@ -90,7 +104,6 @@ public class GgApiService {
     }
 
     private String fetchTourDataInternal(WebClient webClient, int pageIndex, int pageSize, String serviceKey) {
-
         try {
             String finalKey = serviceKey;
 
@@ -102,11 +115,19 @@ public class GgApiService {
                             .queryParam("pSize", pageSize)
                             .build())
                     .retrieve()
+                    .onStatus(status -> status.isError(), clientResponse -> {
+                        System.err.println("WebClient 오류 발생! HTTP Status: " + clientResponse.statusCode());
+                        return clientResponse.bodyToMono(String.class)
+                                .flatMap(errorBody -> {
+                                    System.err.println("Error Body: " + errorBody);
+                                    return Mono.error(new RuntimeException("API 응답 오류, Status: " + clientResponse.statusCode()));
+                                });
+                    })
                     .bodyToMono(String.class)
                     .block();
         } catch (Exception e) {
             System.err.println("API 호출 중 오류 발생 (키: " + serviceKey.substring(0, 8) + "...): " + e.getMessage());
-            return null;
+            return "";
         }
     }
 }
