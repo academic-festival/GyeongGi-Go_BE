@@ -28,10 +28,11 @@ public class TranslationService {
     // return : 번역한 텍스트를 포함하는 Mono<String>
     public Mono<String> translateToEnglish(String jsonText) {
         String prompt = String.format(
-                "아래 JSON 데이터를 영어로 번역해줘. 'code'와 'data' 내의 'x', 'y' (좌표), 'refineWgs84Lat', 'refineWgs84Logt' 값은 절대 수정하지 마. " +
-                "다른 모든 한글 문자열(예: message, sigunNm, turSmInfoNm, nmSmNm, smReAddr, placeName, locationExplain 등)은 자연스러운 영어로 번역해야 해. " +
-                "번역된 내용 외에 어떠한 설명이나 서두도 붙이지 말고, 결과는 오직 유효한 JSON 형식으로만 반환해줘. " +
-                "\n\n---원본 데이터---\n%s", jsonText);
+                "아래 JSON 데이터를 영어로 번역해줘. 'code'와 'data' 내의 'x', 'y' (좌표), " +
+                        "'REFINE_WGS84_LAT', 'REFINE_WGS84_LOGT' 값은 절대 수정하지 마. " +
+                        "다른 모든 한글 문자열(예: message, sigunNm, turSmInfoNm, nmSmNm, smReAddr, placeName, locationExplain 등)은 자연스러운 영어로 번역해야 해. " +
+                        "번역된 내용 외에 어떠한 설명이나 서두도 붙이지 말고, 결과는 오직 유효한 JSON 형식으로만 반환해줘. " +
+                        "\n\n---원본 데이터---\n%s", jsonText);
 
         Map<String, Object> requestBody = Map.of(
                 "contents", List.of(Map.of(
