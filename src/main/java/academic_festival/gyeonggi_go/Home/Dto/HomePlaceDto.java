@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -14,7 +16,7 @@ public class HomePlaceDto {
     private String address;
     private Double x; // 경도 (Longitude)
     private Double y; // 위도 (Latitude)
-    private String placeImg; // Place 엔티티에서 가져옴
+    List<String> placeImg; // Place 엔티티에서 가져옴
     private String inquiry;
 
     // GgApiResponse.Row와 Place 엔티티를 받아 DTO 생성
