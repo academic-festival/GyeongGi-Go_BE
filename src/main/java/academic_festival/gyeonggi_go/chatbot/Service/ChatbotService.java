@@ -16,7 +16,6 @@ import java.util.Map;
 public class ChatbotService {
     private final WebClient webClient;
     private final String apiKey;
-    //rivate final TtsService ttsService;
     private final ObjectProvider<TtsService> ttsServiceProvider;
     private static final Logger logger = LoggerFactory.getLogger(ChatbotService.class);
 
@@ -26,7 +25,6 @@ public class ChatbotService {
                           ObjectProvider<TtsService> ttsServiceProvider) {
         this.webClient = webClientBuilder.baseUrl(apiUrl).build();
         this.apiKey = apiKey;
-        //this.ttsService = ttsService;
         this.ttsServiceProvider = ttsServiceProvider;
     }
 
@@ -122,7 +120,7 @@ public class ChatbotService {
                                     "\n---제공된 컨텍스트---" +
                                     "\n%s" +
                                     "\n---컨텍스트 끝---" +
-                                    "\n\n위에 제공된 **컨텍스트만을 바탕으로** '%s'라는 관광지에 대해 흥미로운 서로다른 질문 30개를 'Question1: 내용, Question2: 내용, Question3: 내용' 형식으로 다음줄에 제안해줘." +
+                                    "\n\n위에 제공된 **컨텍스트만을 바탕으로 혹시 정보가 부족하면 너가 조금 더 써두돼** '%s'라는 관광지에 대해 흥미로운 서로다른 질문 30개를 'Question1: 내용, Question2: 내용, Question3: 내용' 형식으로 다음줄에 제안해줘." +
                                     "⚠️ 컨텍스트에 없는 정보는 사용하지 마." +
                                     "질문은 물음표 포함해서 영어 45글자 이내로 해줘!",
                             locationExplain, englishPlace);
