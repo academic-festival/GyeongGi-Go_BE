@@ -5,13 +5,15 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
 public class PlaceDetailDto {
     private Long placeId;
     private String placeName;
-    private String placeImg;
+    private List<String> placeImg;
     private String locationExplain;
     private String price;
     private String inquiry;

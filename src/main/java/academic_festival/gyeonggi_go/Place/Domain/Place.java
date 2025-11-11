@@ -1,10 +1,13 @@
 package academic_festival.gyeonggi_go.Place.Domain;
 
+import academic_festival.gyeonggi_go.config.StringListConverter;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Comment;
+
+import java.util.List;
 
 @Entity
 @Getter
@@ -33,9 +36,10 @@ public class Place {
     @Comment("위도")
     private Double y;
 
-    @Column(name = "place_img", length = 500)
-    @Comment("이미지 URL")
-    private String placeImg;
+    @Convert(converter = StringListConverter.class)
+    @Column(name = "place_img", columnDefinition = "TEXT")
+    @Comment("이미지 URL 리스트 (JSON 직렬화)")
+    private List<String> placeImg;
 
     @Lob
     @Column(name = "location_explain", columnDefinition = "TEXT")
