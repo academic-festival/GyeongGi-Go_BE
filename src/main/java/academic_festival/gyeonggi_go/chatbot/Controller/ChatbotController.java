@@ -34,45 +34,39 @@ public class ChatbotController {
     }
 
     @PostMapping("/start")
-    @Operation(summary = "챗봇 대화 시작", description = "장소 이름을 기반으로 챗봇과의 대화를 시작합니다.")
+    @Operation(summary = "챗봇 대화 시작", description = "장소 ID를 기반으로 챗봇과의 대화를 시작합니다.")
     @io.swagger.v3.oas.annotations.parameters.RequestBody(
             required = true,
-            description = "장소 이름으로 대화를 시작합니다.",
+            description = "장소 ID로 대화를 시작합니다.",
             content = @Content(
                     schema = @Schema(implementation = ChatbotRequestDto.class),
                     examples = {
                             @ExampleObject(
                                     name = "대화 시작",
-                                    summary = "장소로 대화 시작",
-                                    value = "{\"placename\": \"수원화성\", \"address\": \"수원시\"}"
+                                    summary = "장소 ID로 대화 시작",
+                                    value = "{\"placeId\": 10}"
                             )
                     }
             )
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "요청 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청 (placename 또는 address필드 누락)"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 (placeId 필드 누락)"),
             @ApiResponse(responseCode = "404", description = "장소를 찾을 수 없음")
     })
     public Mono<ApiResponseDto<ChatbotDataDto>> startChat(@RequestBody ChatbotRequestDto request,
                                                           @Parameter(description = "TTS 음성 응답 활성화 여부", example = "true")
                                                           @RequestParam(value = "enableTts", defaultValue = "false") boolean enableTts) {
-        if (request.getPlacename() == null || request.getPlacename().isEmpty()) {
-            // 잘못된 요청에 대한 처리
-            ChatbotDataDto errorData = new ChatbotDataDto("placename is required.", null, null);
-            return Mono.just(new ApiResponseDto<>(400, "요청이 유효하지 않습니다. placename이 필요합니다.", errorData));
-        }
-
-        if (request.getAddress() == null || request.getAddress().isEmpty()) {
-            // 잘못된 요청에 대한 처리
-            ChatbotDataDto errorData = new ChatbotDataDto("address is required.", null, null);
-            return Mono.just(new ApiResponseDto<>(400, "요청이 유효하지 않습니다. address가 필요합니다.", errorData));
+        // 수정: placeId가 null인지 체크
+        if (request.getPlaceId() == null) {
+            ChatbotDataDto errorData = new ChatbotDataDto("placeId is required.", null, null);
+            return Mono.just(new ApiResponseDto<>(400, "요청이 유효하지 않습니다. placeId가 필요합니다.", errorData));
         }
 
         return Mono.fromCallable(() -> {
-                    // 1. DB에서 장소 정보 조회
-                    return placeRepository.findByPlaceNameAndAddress(request.getPlacename(), request.getAddress())
-                            .orElseThrow(() -> new NoSuchElementException("Place not found: " + request.getPlacename() + " at " + request.getAddress()));
+                    // 1. DB에서 placeId로 장소 정보 조회
+                    return placeRepository.findById(request.getPlaceId())
+                            .orElseThrow(() -> new NoSuchElementException("Place not found for ID: " + request.getPlaceId()));
                 })
                 .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(place -> {
@@ -91,6 +85,8 @@ public class ChatbotController {
                 })
                 // 기타 예외 처리
                 .onErrorResume(Exception.class, e -> {
+                    // 서버 내부 오류 발생 시 디버깅을 위해 스택 트레이스 출력 (선택적)
+                    e.printStackTrace();
                     ChatbotDataDto errorData = new ChatbotDataDto("An internal error occurred.", null, null);
                     return Mono.just(new ApiResponseDto<>(500, "서버 내부 오류.", errorData));
                 });
@@ -107,31 +103,29 @@ public class ChatbotController {
                             @ExampleObject(
                                     name = "대화 이어가기",
                                     summary = "질문으로 대화 시작",
-                                    value = "{\"placename\": \"수원화성\", \"address\": \"수원시\", \"question\": \"What is the history behind Suwon Hwaseong?\"}"
+                                    value = "{\"placeId\": 10, \"question\": \"What is the history behind Suwon Hwaseong?\"}"
                             )
                     }
             )
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "요청 성공"),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청 (question 또는 placename 필드 또는 address 누락)"),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 (question 또는 placeId 필드 누락)"),
             @ApiResponse(responseCode = "404", description = "장소를 찾을 수 없음")
     })
     public Mono<ApiResponseDto<ChatbotDataDto>> continueChat(@RequestBody ChatbotRequestDto request,
                                                              @Parameter(description = "TTS 음성 응답 활성화 여부", example = "true")
                                                              @RequestParam(value = "enableTts", defaultValue = "false") boolean enableTts) {
-        if (request.getQuestion() == null || request.getQuestion().isEmpty() ||
-                request.getPlacename() == null || request.getPlacename().isEmpty() ||
-                request.getAddress() == null || request.getAddress().isEmpty()){
-
-            ChatbotDataDto errorData = new ChatbotDataDto("Question and Placename and Address are required.", null, null);
-            return Mono.just(new ApiResponseDto<>(400, "요청이 유효하지 않습니다. question과 placename과 address가 필요합니다.", errorData));
+        // 수정: placeId 또는 question이 null인지 체크
+        if (request.getQuestion() == null || request.getQuestion().isEmpty() || request.getPlaceId() == null){
+            ChatbotDataDto errorData = new ChatbotDataDto("Question and placeId are required.", null, null);
+            return Mono.just(new ApiResponseDto<>(400, "요청이 유효하지 않습니다. question과 placeId가 필요합니다.", errorData));
         }
 
         return Mono.fromCallable(() -> {
-                    // 1. DB에서 장소 정보 조회
-                    return placeRepository.findByPlaceNameAndAddress(request.getPlacename(), request.getAddress())
-                            .orElseThrow(() -> new NoSuchElementException("Place not found: " + request.getPlacename() + " at " + request.getAddress()));
+                    // 1. DB에서 placeId로 장소 정보 조회
+                    return placeRepository.findById(request.getPlaceId())
+                            .orElseThrow(() -> new NoSuchElementException("Place not found for ID: " + request.getPlaceId()));
                 })
                 .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(place -> {
@@ -150,6 +144,8 @@ public class ChatbotController {
                 })
                 // 기타 예외 처리
                 .onErrorResume(Exception.class, e -> {
+                    // 서버 내부 오류 발생 시 디버깅을 위해 스택 트레이스 출력 (선택적)
+                    e.printStackTrace();
                     ChatbotDataDto errorData = new ChatbotDataDto("An internal error occurred.", null, null);
                     return Mono.just(new ApiResponseDto<>(500, "서버 내부 오류.", errorData));
                 });
