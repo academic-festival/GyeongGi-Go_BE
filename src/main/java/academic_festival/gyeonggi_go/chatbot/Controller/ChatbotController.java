@@ -44,7 +44,7 @@ public class ChatbotController {
                             @ExampleObject(
                                     name = "대화 시작",
                                     summary = "장소 ID로 대화 시작",
-                                    value = "{\"placeId\": 10}"
+                                    value = "{\"placeId\": 153}"
                             )
                     }
             )
@@ -103,7 +103,7 @@ public class ChatbotController {
                             @ExampleObject(
                                     name = "대화 이어가기",
                                     summary = "질문으로 대화 시작",
-                                    value = "{\"placeId\": 10, \"question\": \"What is the history behind Suwon Hwaseong?\"}"
+                                    value = "{\"placeId\": 153, \"question\": \"What is the history behind Suwon Hwaseong?\"}"
                             )
                     }
             )
@@ -116,7 +116,7 @@ public class ChatbotController {
     public Mono<ApiResponseDto<ChatbotDataDto>> continueChat(@RequestBody ChatbotRequestDto request,
                                                              @Parameter(description = "TTS 음성 응답 활성화 여부", example = "true")
                                                              @RequestParam(value = "enableTts", defaultValue = "false") boolean enableTts) {
-        // 수정: placeId 또는 question이 null인지 체크
+        // placeId 또는 question이 null인지 체크
         if (request.getQuestion() == null || request.getQuestion().isEmpty() || request.getPlaceId() == null){
             ChatbotDataDto errorData = new ChatbotDataDto("Question and placeId are required.", null, null);
             return Mono.just(new ApiResponseDto<>(400, "요청이 유효하지 않습니다. question과 placeId가 필요합니다.", errorData));
@@ -144,7 +144,7 @@ public class ChatbotController {
                 })
                 // 기타 예외 처리
                 .onErrorResume(Exception.class, e -> {
-                    // 서버 내부 오류 발생 시 디버깅을 위해 스택 트레이스 출력 (선택적)
+                    // 서버 내부 오류 발생 시 디버깅을 위해 스택 트레이스 출력
                     e.printStackTrace();
                     ChatbotDataDto errorData = new ChatbotDataDto("An internal error occurred.", null, null);
                     return Mono.just(new ApiResponseDto<>(500, "서버 내부 오류.", errorData));
