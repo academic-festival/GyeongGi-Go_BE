@@ -26,9 +26,10 @@ public class SecurityConfig {
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/swagger-ui/**", "/swagger", "/v2/api-docs", "/v3/api-docs/**", "/swagger-ui.html", "/api-docs", "/api-docs/**", "/configuration/security", "/configuration/ui", "/swagger-resources/**", "/webjars/**",
-                                "/home", "/places/**", "/chatbot/**").permitAll()
-                        .anyRequest().authenticated() // 나머지 요청은 인증 필요
+                                .requestMatchers("/**").permitAll() // 모든 경로를 일단 다 허용
+                        //requestMatchers("/swagger-ui/**", "/swagger", "/v2/api-docs", "/v3/api-docs/**", "/swagger-ui.html", "/api-docs", "/api-docs/**", "/configuration/security", "/configuration/ui", "/swagger-resources/**", "/webjars/**",
+                        //        "/home", "/places/**", "/chatbot/**").permitAll()
+                        //.anyRequest().authenticated() // 나머지 요청은 인증 필요
                 );
         return http.build();
     }
