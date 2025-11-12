@@ -15,7 +15,8 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/home", "/places/**", "/chatbot/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/swagger", "v2/api-docs", "/v3/api-docs/**", "/swagger-ui.html", "api-docs", "/api-docs/**", "/configuration/security", "/configuration/ui", "/swagger-resources/**", "/webjars/**",
+                                "/home", "/places/**", "/chatbot/**").permitAll()
                         .anyRequest().authenticated() // 나머지 요청은 인증 필요
                 );
         return http.build();
