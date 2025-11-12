@@ -22,7 +22,8 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                // 4. 세션 정책을 STATELESS로 설정 (API 서버이므로)
+                .formLogin(formLogin -> formLogin.disable())
+                .httpBasic(httpBasic -> httpBasic.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/swagger-ui/**", "/swagger", "/v2/api-docs", "/v3/api-docs/**", "/swagger-ui.html", "/api-docs", "/api-docs/**", "/configuration/security", "/configuration/ui", "/swagger-resources/**", "/webjars/**",
