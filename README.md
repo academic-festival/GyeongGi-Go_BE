@@ -2,6 +2,8 @@
 
 2025 가톨릭대학교 컴퓨터정보공학부 학술제 GyeongGi-Go BE 레포입니다.
 > 외국인 관광객들을 위한 경기도 관광지 큐레이션 서비스
+<img width="1920" height="1080" alt="Image" src="https://github.com/user-attachments/assets/d2f1d3fb-40de-4d7e-985b-cce4ba3976ff" />
+
 <br>
 
 
@@ -37,10 +39,7 @@ K-컬처의 인기로 한국을 방문하는 외국인 관광객은 많아졌지
 <br>
 
 ## 🔨 기술 스택 (Stacks)
-
-* **Back-end:** Java, Spring boot
-* **Database:** mysql (Google Cloud Engine)
-* **DevOps:** GCP, Docker
+<img width="1918" height="1080" alt="Image" src="https://github.com/user-attachments/assets/4db5a403-0a87-4536-8413-1774d06a4def" />
 
 <br>
 
