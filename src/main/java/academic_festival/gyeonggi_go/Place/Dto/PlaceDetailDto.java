@@ -14,8 +14,8 @@ import java.util.stream.Collectors;
 public class PlaceDetailDto {
     private Long placeId;
     private String placeName;
-    private String address; // <-- 주소 추가
-    private List<String> placeImages; // placeImgUrls로 대체
+    private String address;
+    private List<String> placeImages;
     private String locationExplain;
     private String price;
     private String inquiry;
@@ -23,7 +23,7 @@ public class PlaceDetailDto {
     public PlaceDetailDto(Place place) {
         this.placeId = place.getPlaceId();
         this.placeName = place.getPlaceName();
-        this.address = place.getAddress(); // <-- 주소 설정 추가
+        this.address = place.getAddress();
         this.placeImages = place.getPlaceImg() != null ?
                 place.getPlaceImg().stream().filter(s -> s != null && !s.isEmpty()).collect(Collectors.toList()) :
                 List.of();
