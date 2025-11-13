@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -13,7 +14,8 @@ import java.util.List;
 public class PlaceDetailDto {
     private Long placeId;
     private String placeName;
-    private List<String> placeImg;
+    private String address;
+    private List<String> placeImages;
     private String locationExplain;
     private String price;
     private String inquiry;
@@ -21,7 +23,10 @@ public class PlaceDetailDto {
     public PlaceDetailDto(Place place) {
         this.placeId = place.getPlaceId();
         this.placeName = place.getPlaceName();
-        this.placeImg = place.getPlaceImg();
+        this.address = place.getAddress();
+        this.placeImages = place.getPlaceImg() != null ?
+                place.getPlaceImg().stream().filter(s -> s != null && !s.isEmpty()).collect(Collectors.toList()) :
+                List.of();
         this.locationExplain = place.getLocationExplain();
         this.price = place.getPrice();
         this.inquiry = place.getInquiry();
