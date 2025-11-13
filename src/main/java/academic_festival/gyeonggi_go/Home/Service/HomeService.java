@@ -1,9 +1,9 @@
 package academic_festival.gyeonggi_go.Home.Service;
 
 import academic_festival.gyeonggi_go.Home.Dto.GgApiResponse;
-import academic_festival.gyeonggi_go.Home.Dto.HomePlaceDto; // DTO 변경
+import academic_festival.gyeonggi_go.Home.Dto.HomePlaceDto;
 import academic_festival.gyeonggi_go.Place.Domain.Place;
-import academic_festival.gyeonggi_go.Place.Repository.PlaceRepository; // 추가
+import academic_festival.gyeonggi_go.Place.Repository.PlaceRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -16,18 +16,17 @@ import java.util.stream.Collectors;
 public class HomeService {
 
     private final GgApiService ggApiService;
-    private final PlaceRepository placeRepository; // <-- 추가
+    private final PlaceRepository placeRepository;
 
-    public HomeService(GgApiService ggApiService, PlaceRepository placeRepository) { // <-- 생성자 수정
+    public HomeService(GgApiService ggApiService, PlaceRepository placeRepository) {
         this.ggApiService = ggApiService;
         this.placeRepository = placeRepository;
     }
 
-    public List<HomePlaceDto> getNearestTourData(double userLat, double userLon) { // <-- 반환 타입 수정
-        // GgApiService를 통해 모든 관광지 데이터 로드 (중복 제거된 데이터)
+    public List<HomePlaceDto> getNearestTourData(double userLat, double userLon) {
         List<GgApiResponse.Row> allTourData = ggApiService.fetchAllTourDataByAllKeys();
 
-        // 1. 관광지 데이터를 사용자 위치 기준으로 거리 계산 및 정렬 (기존 로직 유지)
+        // 1. 거리 계산 및 정렬 로직 (변경 없음)
         List<GgApiResponse.Row> sortedList = allTourData.stream()
                 .filter(row -> row.getRefineWgs84Lat() != null && row.getRefineWgs84Logt() != null)
                 .filter(row -> !row.getRefineWgs84Lat().trim().isEmpty() && !row.getRefineWgs84Logt().trim().isEmpty())
@@ -52,23 +51,20 @@ public class HomeService {
         List<HomePlaceDto> homePlaceDtos = sortedList.stream()
                 .map(row -> {
                     String placeName = row.getTurSmInfoNmForOutput();
-                    // PlaceBatchSyncService의 Address 저장 로직을 따름
                     String addressToQuery = Optional.ofNullable(row.getSmReAddr())
                             .filter(a -> !a.isEmpty())
                             .orElse(row.getSigunNm());
 
-                    // DB에서 Place 엔티티 조회 (Name과 Address 기반)
                     Optional<Place> placeOptional = placeRepository.findByPlaceNameAndAddress(placeName, addressToQuery);
 
                     if (placeOptional.isPresent()) {
-                        // DB의 Place 엔티티와 API의 Row 데이터를 결합하여 DTO 생성
+                        // DB의 Place 엔티티와 API의 Row 데이터를 결합하여 HomePlaceDto 생성
                         return new HomePlaceDto(row, placeOptional.get());
                     } else {
-                        // DB에 없는 데이터는 필터링
                         return null;
                     }
                 })
-                .filter(Objects::nonNull) // DB에 존재하는 데이터만 필터링
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
         return homePlaceDtos;
