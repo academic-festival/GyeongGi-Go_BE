@@ -43,7 +43,6 @@ public class HomeService {
                 .filter(Objects::nonNull)
                 .sorted(Comparator.comparingDouble(w -> w.distance))
                 .map(w -> w.row)
-                // .limit(20) // 상위 20개 제한이 제거되었습니다.
                 .collect(Collectors.toList());
 
         System.out.println("가장 가까운 순으로 " + sortedList.size() + "개의 명소 정렬 완료.");
