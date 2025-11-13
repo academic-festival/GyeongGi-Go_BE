@@ -64,9 +64,7 @@ public class HomeService {
                         return null; // 좌표 오류 시 매핑 실패 처리
                     }
 
-                    // *************** 수정된 부분: findByPlaceNameAndXAndY 사용 ***************
                     Optional<Place> placeOptional = placeRepository.findByPlaceNameAndXAndY(placeName, x, y);
-                    // *******************************************************************
 
                     if (placeOptional.isPresent()) {
                         // DB의 Place 엔티티와 API의 Row 데이터를 결합하여 HomePlaceDto 생성
