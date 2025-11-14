@@ -44,6 +44,6 @@ K-컬처의 인기로 한국을 방문하는 외국인 관광객은 많아졌지
 <br>
 
 ## 🧑‍💻 Developer
-| Backend | Backend |
-| :---: | :---: |
-| [서민주](https://github.com/minjjoo) | [한태림](https://github.com/TaeRim0701) | 
+| Backend | Backend | Frontend |
+| :---: | :---: | :---: |
+| [서민주](https://github.com/minjjoo) | [한태림](https://github.com/TaeRim0701) | [김승원](https://github.com/SeungWon1125)
