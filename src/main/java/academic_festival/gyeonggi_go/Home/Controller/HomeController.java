@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 
 @RestController
 public class HomeController {
@@ -26,6 +26,7 @@ public class HomeController {
         this.homeService = homeService;
         this.translationService = translationService;
         this.objectMapper = objectMapper;
+        this.objectMapper.enable(com.fasterxml.jackson.databind.SerializationFeature.INDENT_OUTPUT);
     }
 
     @PostMapping("/home")
@@ -38,11 +39,10 @@ public class HomeController {
         // HomeService에서 HomePlaceDto 리스트를 가져옴
         List<HomePlaceDto> nearestData = homeService.getNearestTourData(userLat, userLon); // <-- DTO 반환
 
-        Map<String, Object> responseMap = new HashMap<>();
+        Map<String, Object> responseMap = new LinkedHashMap<>(); // <-- 수정
         responseMap.put("code", 200);
-        responseMap.put("message", "명소 목록 조회 성공");
-        responseMap.put("data", nearestData); // data에 HomePlaceDto List 객체를 넣음
-
+        responseMap.put("message", "명소 목록 조회 성공"); // message를 data 앞에 넣습니다.
+        responseMap.put("data", nearestData);
         String jsonString;
         try {
             jsonString = objectMapper.writeValueAsString(responseMap);

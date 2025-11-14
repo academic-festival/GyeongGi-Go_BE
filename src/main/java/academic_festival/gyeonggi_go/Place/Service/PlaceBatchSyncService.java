@@ -59,8 +59,12 @@ public class PlaceBatchSyncService {
             if (transformedPlace.isPresent()) {
                 Place newPlace = transformedPlace.get();
 
-                // 중복 확인 로직 (PlaceName과 Address 기반)
-                Optional<Place> existingPlace = placeRepository.findByPlaceNameAndAddress(newPlace.getPlaceName(), newPlace.getAddress());
+                // 중복 확인 로직 (PlaceName과 X, Y 좌표 기반)
+                Optional<Place> existingPlace = placeRepository.findByPlaceNameAndXAndY(
+                        newPlace.getPlaceName(),
+                        newPlace.getX(),
+                        newPlace.getY()
+                );
 
                 if (existingPlace.isPresent()) {
                     // 데이터 업데이트 (Update)
@@ -92,8 +96,13 @@ public class PlaceBatchSyncService {
     private Optional<Place> transformToPlace(GgApiResponse.Row row) {
         String name = row.getTurSmInfoNmForOutput();
         String address = Optional.ofNullable(row.getSmReAddr()).orElse(""); // ETST, TTST API용 주소 사용
-        if (address.isEmpty()) {
 
+        String finalAddress;
+        if (address.isEmpty() || address.trim().isEmpty()) {
+            // 상세 주소가 없으면 시군명(예: "수원시") 사용
+            finalAddress = row.getSigunNm();
+        } else {
+            finalAddress = address;
         }
 
         try {
@@ -106,9 +115,9 @@ public class PlaceBatchSyncService {
 
             Place place = new Place();
             place.setPlaceName(name);
-            place.setAddress(address.isEmpty() ? row.getSigunNm() : address);
-            place.setY(lat);
-            place.setX(lon);
+            place.setAddress(finalAddress);
+            place.setY(lat); // 위도 (Latitude)
+            place.setX(lon); // 경도 (Longitude)
 
             // 기타 필드 매핑 (현재 Row DTO에 없는 정보는 일단 null 또는 기본값)
             place.setInquiry(row.getTelNo());
@@ -122,7 +131,8 @@ public class PlaceBatchSyncService {
 
     // 기존 데이터에 새 데이터의 변경 가능한 필드만 업데이트
     private void updatePlaceFields(Place existing, Place newPlace) {
-        existing.setAddress(newPlace.getAddress());
+
+        // 좌표와 문의 정보는 API 데이터로 업데이트합니다.
         existing.setX(newPlace.getX());
         existing.setY(newPlace.getY());
         existing.setInquiry(newPlace.getInquiry());
