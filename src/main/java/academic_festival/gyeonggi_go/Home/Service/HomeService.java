@@ -67,7 +67,7 @@ public class HomeService {
 
                     if (placeOptional.isPresent()) {
                         // DB의 Place 엔티티와 API의 Row 데이터를 결합하여 HomePlaceDto 생성
-                        return new HomePlaceDto(row, placeOptional.get());
+                        return new HomePlaceDto(placeOptional.get());
                     } else {
                         // DB에 매핑되는 행이 없으면 제외
                         return null;
