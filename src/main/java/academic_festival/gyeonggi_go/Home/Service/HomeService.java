@@ -66,7 +66,7 @@ public class HomeService {
                     Optional<Place> placeOptional = placeRepository.findByPlaceNameAndXAndY(placeName, x, y);
 
                     if (placeOptional.isPresent()) {
-                        // DB의 Place 엔티티와 API의 Row 데이터를 결합하여 HomePlaceDto 생성
+                        // DB의 Place 엔티티만 사용하여 HomePlaceDto 생성 (상세 주소를 DB에서 가져옵니다)
                         return new HomePlaceDto(placeOptional.get());
                     } else {
                         // DB에 매핑되는 행이 없으면 제외
@@ -76,8 +76,18 @@ public class HomeService {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
-        // 3. 최종 응답 JSON에서 placeName을 기준으로 중복 제거 (가장 가까운 명소 하나만 남김)
-        return homePlaceDtos.stream()
+        System.out.println("--- [필터링 시작] 최종 명소 리스트 중 주소에 '수원'이 포함된 명소만 필터링합니다. ---");
+
+        // 3. '수원' 주소 필터링
+        List<HomePlaceDto> filteredList = homePlaceDtos.stream()
+                // 주소 필드가 null이 아니며 '수원'을 포함하는 경우만 통과
+                .filter(dto -> dto.getAddress() != null && dto.getAddress().contains("수원"))
+                .collect(Collectors.toList());
+
+        System.out.println("--- [필터링 완료] '수원' 명소 수: " + filteredList.size() + "건 ---");
+
+        // 4. 최종 응답 JSON에서 placeName을 기준으로 중복 제거 (가장 가까운 명소 하나만 남김)
+        return filteredList.stream()
                 .collect(Collectors.toMap(
                         HomePlaceDto::getPlaceName, // Key: placeName
                         dto -> dto,
