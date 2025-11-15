@@ -66,7 +66,7 @@ public class HomeService {
                     Optional<Place> placeOptional = placeRepository.findByPlaceNameAndXAndY(placeName, x, y);
 
                     if (placeOptional.isPresent()) {
-                        // DB의 Place 엔티티만 사용하여 HomePlaceDto 생성 (상세 주소를 DB에서 가져옵니다)
+                        // DB의 Place 엔티티만 사용하여 HomePlaceDto 생성
                         return new HomePlaceDto(placeOptional.get());
                     } else {
                         // DB에 매핑되는 행이 없으면 제외
