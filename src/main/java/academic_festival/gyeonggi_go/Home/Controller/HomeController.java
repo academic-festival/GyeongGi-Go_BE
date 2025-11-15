@@ -39,10 +39,14 @@ public class HomeController {
         // HomeService에서 HomePlaceDto 리스트를 가져옴
         List<HomePlaceDto> nearestData = homeService.getNearestTourData(userLat, userLon); // <-- DTO 반환
 
-        Map<String, Object> responseMap = new LinkedHashMap<>(); // <-- 수정
+        Map<String, Object> innerDataMap = new LinkedHashMap<>();
+        innerDataMap.put("placeList", nearestData); // 리스트를 placeList 키의 값으로 설정
+
+        Map<String, Object> responseMap = new LinkedHashMap<>();
         responseMap.put("code", 200);
-        responseMap.put("message", "명소 목록 조회 성공"); // message를 data 앞에 넣습니다.
-        responseMap.put("data", nearestData);
+        responseMap.put("message", "명소 목록 조회 성공");
+        responseMap.put("data", innerDataMap); // placeList를 포함하는 맵을 data로 설정
+
         String jsonString;
         try {
             jsonString = objectMapper.writeValueAsString(responseMap);
