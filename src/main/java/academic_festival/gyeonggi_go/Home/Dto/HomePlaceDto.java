@@ -17,7 +17,7 @@ public class HomePlaceDto {
     private String address;
     private Double x; // 경도 (Longitude)
     private Double y; // 위도 (Latitude)
-    private List<String> placeImages; // Place 엔티티의 JSON 직렬화된 URL 리스트
+    private List<String> placeImages;
 
     // 1. 기존 생성자: GgApiResponse.Row와 Place 엔티티를 받아 DTO 생성
     public HomePlaceDto(GgApiResponse.Row row, Place place) {

@@ -4,7 +4,7 @@ import academic_festival.gyeonggi_go.Home.Dto.HomePlaceDto;
 import academic_festival.gyeonggi_go.Home.Dto.UserLocationRequest;
 import academic_festival.gyeonggi_go.Home.Service.HomeService;
 import academic_festival.gyeonggi_go.Home.Service.TranslationService;
-import com.fasterxml.jackson.core.type.TypeReference; // TypeReference 임포트 필요
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,14 +38,14 @@ public class HomeController {
 
         List<HomePlaceDto> nearestData = homeService.getNearestTourData(userLat, userLon);
 
-        // 1. 재주입을 위해 placeId와 placeImages 리스트를 저장합니다.
+        // 1. 재주입을 위해 placeId와 placeImages 리스트를 저장
         Map<Long, List<String>> originalImageMap = nearestData.stream()
                 .collect(Collectors.toMap(
                         HomePlaceDto::getPlaceId,
                         HomePlaceDto::getPlaceImages
                 ));
 
-        // 2. 번역을 위해 placeImages 필드를 제외한 임시 리스트를 생성합니다.
+        // 2. 번역을 위해 placeImages 필드를 제외한 임시 리스트를 생성
         List<Map<String, Object>> sanitizedList = nearestData.stream().map(dto -> {
             // DTO를 Map으로 변환
             Map<String, Object> map = objectMapper.convertValue(dto, new TypeReference<Map<String, Object>>() {});

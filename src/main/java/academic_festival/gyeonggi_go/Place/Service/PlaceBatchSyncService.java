@@ -118,9 +118,6 @@ public class PlaceBatchSyncService {
 
         for (Map<String, Object> update : manualUpdates) {
             String placeName = (String) update.get("placeName");
-            // String address = (String) update.get("address"); // 주소 접근 제거
-
-            // ⭐ placeName만으로 Place 엔티티 조회
             Optional<Place> existingPlaceOptional = placeRepository.findByPlaceName(placeName); // findByPlaceNameAndAddress -> findByPlaceName 변경
 
             if (existingPlaceOptional.isPresent()) {
@@ -199,7 +196,5 @@ public class PlaceBatchSyncService {
         existing.setX(newPlace.getX());
         existing.setY(newPlace.getY());
         existing.setInquiry(newPlace.getInquiry());
-
-        // ManualUpdate로 들어온 address, locationExplain 등은 유지하기 위해 건드리지 않음
     }
 }
