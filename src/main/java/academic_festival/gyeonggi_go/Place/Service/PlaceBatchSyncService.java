@@ -2,6 +2,7 @@ package academic_festival.gyeonggi_go.Place.Service;
 
 import academic_festival.gyeonggi_go.Home.Dto.GgApiResponse;
 import academic_festival.gyeonggi_go.Home.Service.GgApiService;
+import academic_festival.gyeonggi_go.Home.Service.ManualPlaceData;
 import academic_festival.gyeonggi_go.Place.Domain.Place;
 import academic_festival.gyeonggi_go.Place.Repository.PlaceRepository;
 import jakarta.transaction.Transactional;
@@ -9,6 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -22,18 +24,29 @@ public class PlaceBatchSyncService {
         this.placeRepository = placeRepository;
     }
 
-    @Scheduled(cron = "0 0 3 * * *") // cron만 사용
+    // 매일 새벽 3시 정기 동기화 (API -> DB 저장 -> 수동 업데이트)
+    @Scheduled(cron = "0 0 3 * * *")
     @Transactional
     public void scheduleDailySync() {
         System.out.println("--- [cron 실행] 매일 새벽 3시 정기 동기화 시작 ---");
-        this.syncGyeonggiTourData();
+        this.executeFullSync();
     }
 
-    @Scheduled(initialDelay = 0, fixedDelay = Long.MAX_VALUE) // initialDelay만 사용하고, 이후 반복은 하지 않도록 설정
+    // 애플리케이션 시작 후 최초 동기화
+    @Scheduled(initialDelay = 0, fixedDelay = Long.MAX_VALUE)
     @Transactional
     public void scheduleInitialSync() {
         System.out.println("--- [initialDelay 실행] 애플리케이션 시작 후 최초 동기화 시작 ---");
-        this.syncGyeonggiTourData();
+        this.executeFullSync();
+    }
+
+    // 전체 동기화 실행 (순서: API 데이터 동기화 후 수동 데이터 업데이트)
+    public void executeFullSync() {
+        // 1. 경기도 API 데이터 동기화 및 DB 저장/업데이트
+        syncGyeonggiTourData();
+
+        // 2. 수동으로 제공된 상세 데이터로 DB 업데이트
+        applyManualUpdates();
     }
 
 
@@ -69,7 +82,7 @@ public class PlaceBatchSyncService {
                 if (existingPlace.isPresent()) {
                     // 데이터 업데이트 (Update)
                     Place placeToUpdate = existingPlace.get();
-                    updatePlaceFields(placeToUpdate, newPlace); // 필요한 필드만 업데이트
+                    updatePlaceFields(placeToUpdate, newPlace); // API에서 제공하는 필드만 업데이트
                     placeRepository.save(placeToUpdate);
                     updatedCount++;
                 } else {
@@ -84,7 +97,7 @@ public class PlaceBatchSyncService {
 
         long endTime = System.currentTimeMillis();
 
-        System.out.println("[ETL-Load] 데이터 동기화 완료!");
+        System.out.println("[ETL-Load] API 데이터 동기화 완료!");
         System.out.println(" - 신규 삽입: " + insertedCount + "건");
         System.out.println(" - 기존 업데이트: " + updatedCount + "건");
         System.out.println(" - 데이터 누락/건너뜀: " + skippedCount + "건");
@@ -92,7 +105,59 @@ public class PlaceBatchSyncService {
         System.out.println("=================================================");
     }
 
-    // GgApiResponse.Row를 Place 엔티티로 변환
+    // 수동 데이터 업데이트 로직 (placeName 기준으로 매칭)
+    @Transactional
+    public void applyManualUpdates() {
+        System.out.println("=================================================");
+        System.out.println("[배치] ManualPlaceData 수동 업데이트 시작 (기준: placeName)");
+        long startTime = System.currentTimeMillis();
+
+        List<Map<String, Object>> manualUpdates = ManualPlaceData.getManualUpdates();
+        int updatedCount = 0;
+        int skippedCount = 0;
+
+        for (Map<String, Object> update : manualUpdates) {
+            String placeName = (String) update.get("placeName");
+            // String address = (String) update.get("address"); // 주소 접근 제거
+
+            // ⭐ placeName만으로 Place 엔티티 조회
+            Optional<Place> existingPlaceOptional = placeRepository.findByPlaceName(placeName); // findByPlaceNameAndAddress -> findByPlaceName 변경
+
+            if (existingPlaceOptional.isPresent()) {
+                Place placeToUpdate = existingPlaceOptional.get();
+
+                // 수동으로 제공된 필드 업데이트
+                placeToUpdate.setLocationExplain((String) update.get("location_explain"));
+                placeToUpdate.setPrice((String) update.get("price"));
+
+                // ManualPlaceData에 있는 주소로 업데이트
+                placeToUpdate.setAddress((String) update.get("address"));
+
+                if (update.get("inquiry") != null) {
+                    placeToUpdate.setInquiry((String) update.get("inquiry"));
+                }
+                if (update.get("operating_hours") != null) {
+                    placeToUpdate.setOperatingHours((String) update.get("operating_hours"));
+                }
+
+                placeRepository.save(placeToUpdate);
+                updatedCount++;
+            } else {
+                // 매칭 실패 시 출력 메시지도 단순화
+                System.err.println("[수동 업데이트 오류] DB에서 일치하는 명소를 찾을 수 없어 건너뜀: " + placeName);
+                skippedCount++;
+            }
+        }
+
+        long endTime = System.currentTimeMillis();
+        System.out.println("[배치] ManualPlaceData 수동 업데이트 완료!");
+        System.out.println(" - 업데이트 완료: " + updatedCount + "건");
+        System.out.println(" - 건너뜀 (미매칭): " + skippedCount + "건");
+        System.out.println(" - 총 처리 시간: " + (endTime - startTime) + "ms");
+        System.out.println("=================================================");
+    }
+
+    // GgApiResponse.Row를 Place 엔티티로 변환 (기존 코드 유지)
     private Optional<Place> transformToPlace(GgApiResponse.Row row) {
         String name = row.getTurSmInfoNmForOutput();
         String address = Optional.ofNullable(row.getSmReAddr()).orElse(""); // ETST, TTST API용 주소 사용
@@ -119,7 +184,7 @@ public class PlaceBatchSyncService {
             place.setY(lat); // 위도 (Latitude)
             place.setX(lon); // 경도 (Longitude)
 
-            // 기타 필드 매핑 (현재 Row DTO에 없는 정보는 일단 null 또는 기본값)
+            // 기타 필드 매핑
             place.setInquiry(row.getTelNo());
 
             return Optional.of(place);
@@ -129,12 +194,12 @@ public class PlaceBatchSyncService {
         }
     }
 
-    // 기존 데이터에 새 데이터의 변경 가능한 필드만 업데이트
+    // 기존 API 데이터 업데이트 로직 (API에서 제공하는 필드만 업데이트)
     private void updatePlaceFields(Place existing, Place newPlace) {
-
-        // 좌표와 문의 정보는 API 데이터로 업데이트합니다.
         existing.setX(newPlace.getX());
         existing.setY(newPlace.getY());
         existing.setInquiry(newPlace.getInquiry());
+
+        // ManualUpdate로 들어온 address, locationExplain 등은 유지하기 위해 건드리지 않음
     }
 }
