@@ -3,7 +3,7 @@
 2025 가톨릭대학교 컴퓨터정보공학부 학술제 GyeongGi-Go BE 레포입니다.
 > 외국인 관광객들을 위한 경기도 관광지 큐레이션 서비스
 <img width="1920" height="1080" alt="Image" src="https://github.com/user-attachments/assets/d2f1d3fb-40de-4d7e-985b-cce4ba3976ff" />
-
+<img width="2300" height="893" alt="Image" src="https://github.com/user-attachments/assets/f4b6261c-e8af-4589-ad1d-2c9fb74bb538" />
 <br>
 
 ## 📖 프로젝트 소개
