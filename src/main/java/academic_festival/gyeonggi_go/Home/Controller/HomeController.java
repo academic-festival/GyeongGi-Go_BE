@@ -4,8 +4,12 @@ import academic_festival.gyeonggi_go.Home.Dto.HomePlaceDto;
 import academic_festival.gyeonggi_go.Home.Dto.UserLocationRequest;
 import academic_festival.gyeonggi_go.Home.Service.HomeService;
 import academic_festival.gyeonggi_go.Home.Service.TranslationService;
+import academic_festival.gyeonggi_go.chatbot.Dto.Request.ChatbotRequestDto;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,6 +35,16 @@ public class HomeController {
     }
 
     @PostMapping("/home")
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            required = true,
+            content = @Content(
+                    examples = {
+                            @ExampleObject(
+                                    value = "{\"x\": 127.0151841956, \"y\": 37.2807973662}"
+                            )
+                    }
+            )
+    )
     public Mono<String> getNearestTourData(@RequestBody UserLocationRequest locationRequest) {
 
         double userLat = locationRequest.getY();
